@@ -1,0 +1,76 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+* > * { box-sizing: inherit; }
+
+html {
+  height: 100%;
+}
+
+body {
+  border: 5px solid rgba(0, 0, 0, .2);
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Apfel Grotezk', 'Porpora', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+section {
+  border: 1px solid rgba(0, 0, 0, .8);
+  flex: 0 0 375px;
+  height: 812px;
+  margin-bottom: 8px;
+  overflow-y: auto;
+  padding: 1rem;
+  width: 375px;
+}
+
+.party-membership {
+  display: none;
+  visibility: hidden;
+}
+
+.is-fascist .party-membership {
+  display: unset;
+  visibility: unset;
+}
+
+
+#viewF {
+  display: flex;
+}
+
+.board {
+  border: 1px solid;
+  flex: 1;
+  margin: 1rem;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 1rem auto;
+  grid-gap: 1rem;
+}
+
+.board span {
+  border: 1px dashed;
+}
+
+.board--fascist {
+  border-color: #FF0000;
+}
+
+.board--liberal {
+  border-color: #0000FF;
+}
+
+#viewG {
+  padding-left: 1.5rem;
+  padding-right: 2rem;
+}
+#viewG ol {
+  margin-left: 0;
+}
