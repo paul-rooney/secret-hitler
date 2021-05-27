@@ -21,6 +21,10 @@ const viewH = document.querySelector('#viewH');
 const fascistBoard = document.querySelector('#fascistBoard');
 const liberalBoard = document.querySelector('#liberalBoard');
 const confirmModal = document.querySelector('#confirmModal');
+const openHowToPlayButton = document.querySelector('#openHowToPlayButton');
+const closeHowToPlayButton = document.querySelector('#closeHowToPlayButton');
+const howToPlay = document.querySelector('#button_howToPlay');
+const rules = document.querySelector('.rules');
 
 
 
@@ -53,9 +57,17 @@ function submitForm(e) {
       }
     });
   }
+
+  changeView(viewC);
+}
+
+function changeView(element) {
+  element.classList.toggle('is-in-view');
 }
 
 function nominateChancellor() {
+  if (!player.nominateChancellor) return; // can probably be avoided with clever use of CSS
+
   player.nominateChancellor();
 }
 
@@ -152,6 +164,8 @@ function addTileToBoard(type) {
                   <p>${type}</p>
                 </div>`;
 
+                console.log(markup); // this is adding all three players' markup to each player's board
+
   output.push(markup);
 
   viewD.innerHTML = output.join('');
@@ -174,16 +188,29 @@ function revealPolicyTile(type) {
   player.revealPolicyTile(type);
 }
 
-
+function toggleHowToPlay() {
+  rules.classList.toggle('is-in-view');
+}
 
 
 
 // EVENT HANDLERS
 
 form.addEventListener('submit', submitForm);
-drawPolicyTileButton.addEventListener('click', drawPolicyTiles);
-nominateChancellorButton.addEventListener('click', nominateChancellor);
+// drawPolicyTileButton.addEventListener('click', drawPolicyTiles);
+// nominateChancellorButton.addEventListener('click', nominateChancellor);
 viewD.addEventListener('click', discardPolicyTiles);
+// openHowToPlayButton.addEventListener('click', showHowToPlay);
+
+document.body.addEventListener('click', (e) => {
+
+  if (e.target === drawPolicyTileButton) drawPolicyTiles();
+  if (e.target === nominateChancellorButton) nominateChancellor();
+  // if (e.target === viewD) discardPolicyTiles();
+  // if (e.target === openHowToPlayButton || e.target === closeHowToPlayButton) toggleHowToPlay();
+  if (e.target === button_howToPlay) toggleHowToPlay();
+
+});
 
 
 
@@ -233,9 +260,11 @@ socket.on('returnElectionResult', (election) => {
     containers.forEach(container => container.textContent = '');
 
     let containerToUpdate = document.querySelector(`input[value="${election.president}"]`).parentNode;
+    document.querySelector(`input[value="${election.president}"]`).setAttribute('disabled', 'true');
     containerToUpdate.querySelector('[data-role-container]').textContent = 'President';
 
     containerToUpdate = document.querySelector(`input[value="${election.chancellor}"]`).parentNode;
+    document.querySelector(`input[value="${election.chancellor}"]`).setAttribute('disabled', 'true');
     containerToUpdate.querySelector('[data-role-container]').textContent = 'Chancellor';
 
     if (player.name === election.presidentialCandidate) {
@@ -341,30 +370,30 @@ function formatArray(array) {
   }
 }
 
-function confirmChoice(str, confirm, cancel) {
-  const confirmButton = confirmModal.querySelector('[data-confirm]');
-  const cancelButton = confirmModal.querySelector('[data-cancel]');
-
-  confirmModal.querySelector('p').textContent = str;
-
-  confirmButton.addEventListener('click', () => {
-    confirm();
-    confirmModal.querySelector('p').textContent = '';
-  });
-
-  cancelButton.addEventListener('click', () => {
-    cancel();
-    confirmModal.querySelector('p').textContent = '';
-  });
-}
-
-  // test of the above
-  confirmChoice(
-    'Do a thing.',
-    function() {
-        console.log('You confirmed a thing.');
-    },
-    function() {
-        console.log('You cancelled a thing.');
-    }
-  );
+// function confirmChoice(str, confirm, cancel) {
+//   const confirmButton = confirmModal.querySelector('[data-confirm]');
+//   const cancelButton = confirmModal.querySelector('[data-cancel]');
+//
+//   confirmModal.querySelector('p').textContent = str;
+//
+//   confirmButton.addEventListener('click', () => {
+//     confirm();
+//     confirmModal.querySelector('p').textContent = '';
+//   });
+//
+//   cancelButton.addEventListener('click', () => {
+//     cancel();
+//     confirmModal.querySelector('p').textContent = '';
+//   });
+// }
+  //
+  // // test of the above
+  // confirmChoice(
+  //   'Do a thing.',
+  //   function() {
+  //       console.log('You confirmed a thing.');
+  //   },
+  //   function() {
+  //       console.log('You cancelled a thing.');
+  //   }
+  // );

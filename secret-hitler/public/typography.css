@@ -13,6 +13,8 @@ body {
     font-size:13px;
 }
 
+input,textarea,button {font-family: inherit;}
+
 p, ul, ol, dl, blockquote, pre, dialog{
     font-size:1em; /* 13px */
     line-height:1.3846em; /* 18px */
