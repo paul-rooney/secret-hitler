@@ -11,12 +11,9 @@ server.listen(port, () => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-
-
-
+//
 // CLASSES
-
+//
 class Game {
   constructor() {
     this.liberalPolicyTiles = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal'];
@@ -32,7 +29,7 @@ class Game {
     this.totalPlayers++;
 
     if (this.totalPlayers >= 3) {
-    // if (this.totalPlayers >= 5) {
+      // if (this.totalPlayers >= 5) {
       this.assignPlayerRoles();
     }
   }
@@ -48,27 +45,39 @@ class Game {
     // if (this.totalPlayers < 5 || this.totalPlayers > 10) return;
 
     // 3 Liberals, 1 Fascist + 1 Hitler
-    if (this.totalPlayers === 3) { partyMembershipDistribution = ['Liberal', 'Fascist', 'Hitler']; }
+    if (this.totalPlayers === 3) {
+      partyMembershipDistribution = ['Liberal', 'Fascist', 'Hitler'];
+    }
     // if (this.totalPlayers === 5) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler']; }
 
     // 4 Liberals, 1 Fascist + 1 Hitler
-    if (this.totalPlayers === 6) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler']; }
+    if (this.totalPlayers === 6) {
+      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+    }
 
     // 4 Liberals, 2 Fascists + 1 Hitler
-    if (this.totalPlayers === 7) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler']; }
+    if (this.totalPlayers === 7) {
+      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+    }
 
     // 5 Liberals, 2 Fascists + 1 Hitler
-    if (this.totalPlayers === 8) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler']; }
+    if (this.totalPlayers === 8) {
+      partyMembershipDistribution = [ 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+    }
 
     // 5 Liberals, 3 Fascists + 1 Hitler
-    if (this.totalPlayers === 9) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler']; }
+    if (this.totalPlayers === 9) {
+      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
+    }
 
     // 6 Liberals, 3 Fascists + 1 Hitler
-    if (this.totalPlayers === 10) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler']; }
+    if (this.totalPlayers === 10) {
+      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
+    }
 
     let randomisedDistribution = shuffle(partyMembershipDistribution.slice());
 
-    players.forEach(player => {
+    players.forEach((player) => {
       let partyMembership = randomisedDistribution.pop();
 
       if (partyMembership === 'Liberal') player.partyMembership = 'Liberal';
@@ -124,36 +133,28 @@ class Election {
   }
 }
 
-
-
-
-
-// VARIABLES
-
+//
+// DOM CACHING
+//
 const names = [];
 const players = [];
 
 let ticker = 0;
 
-
-
-
-
+//
 // INITIALISATION
+//
+const game = new Game();
+const election = new Election();
 
-let game = new Game(),
-    election = new Election();
-
-
-
-
-
+//
 // SOCKET.IO LOGIC
-
+//
 io.on('connection', (socket) => {
 
+  //
   // Joining the game
-
+  //
   socket.on('submitName', (name, fn) => {
     if (players.indexOf(name) !== -1) {
       fn(false);
@@ -163,17 +164,16 @@ io.on('connection', (socket) => {
       let newPlayer = {
         name: name,
         id: formatUsername(name),
-        UID: socket.id
-      }
+        UID: socket.id,
+      };
       players.push(newPlayer);
       game.addPlayerToGame();
     }
   });
 
-
-
+  //
   // Election
-
+  //
   socket.on('nominateChancellor', (nominator, nominee, fn) => {
     if (election.isIneligibleForChancellorship !== undefined) {
       if (game.totalPlayers > 5) {
@@ -185,7 +185,8 @@ io.on('connection', (socket) => {
           }
         }
       } else {
-        if (nominee === election.isIneligibleForChancellorship[0]) { // this references the last-elected Chancellor
+        if (nominee === election.isIneligibleForChancellorship[0]) {
+          // this references the last-elected Chancellor
           fn('This person is “term-limited”, and ineligible to be nominated as Chancellor Candidate for this round.');
           return;
         }
@@ -198,26 +199,26 @@ io.on('connection', (socket) => {
   });
 
   socket.on('returnPlayerVote', (vote, player) => {
-    election.votesRequiredToPass = Math.floor((game.totalPlayers / 2) + 1);
+    election.votesRequiredToPass = Math.floor(game.totalPlayers / 2 + 1);
 
     if (vote === 'Ja!') election.votesFor++;
     if (vote === 'Nein.') election.votesAgainst++;
 
     election.playerVotes.push({
       player: player.name,
-      vote: vote
+      vote: vote,
     });
 
     election.totalVotes++;
 
-    // ELECTION SUCCEEDED
+    // Election succeeded
     if (election.votesFor >= election.votesRequiredToPass && election.totalVotes === game.totalPlayers) {
       election.votePassed = true;
       election.president = election.presidentialCandidate;
       election.chancellor = election.chancellorCandidate;
     }
 
-    // ELECTION FAILED
+    // Election failed
     if (election.votesFor < election.votesRequiredToPass && election.totalVotes === game.totalPlayers) {
       election.votePassed = false;
       // advance election tracker ↑
@@ -244,7 +245,9 @@ io.on('connection', (socket) => {
         election.failedElections = 0;
         console.log('The country is thrown into chaos.');
 
-        // ADD LOGIC FOR COLLAPSED GOVERNMENT HERE
+        //
+        // NOTE: ADD LOGIC FOR COLLAPSED GOVERNMENT HERE
+        //
       }
     }
 
@@ -265,17 +268,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('fascistsWin', () => {
-    let msg = 'Hitler has been elected Chancellor after three Fascist Policies have been enacted. \nThe Fascists win.'
+    let msg = 'Hitler has been elected Chancellor after three Fascist Policies have been enacted. \nThe Fascists win.';
 
     io.emit('gameOver', msg);
   });
 
-
-
-
-
+  //
   // Legislative Session
-
+  //
   socket.on('drawPolicyTiles', (player) => {
     let policyTiles = game.drawPolicyTiles();
     io.emit('returnPolicyTiles', player, policyTiles);
@@ -300,16 +300,18 @@ io.on('connection', (socket) => {
       // if there are no new powers unlocked then choose the next presidentialCandidate and run the election code
       if (type === 'Liberal' && game.liberalPoliciesEnacted < 5) {
         // Begin a new round with a new Election
-        let nextCandidate = players.find(player => player.isPresidentialCandidate);
-        console.log({nextCandidate});
+        let nextCandidate = players.find((player) => player.isPresidentialCandidate);
+        console.log({ nextCandidate });
         io.emit('callNewElection', nextCandidate);
       }
 
-      if (game.players < 6) { // for example...
-        if (type === 'Fascist' && game.fascistPoliciesEnacted < 2) { // consult board to see when first presidential power is unlocked
+      if (game.players < 6) {
+        // for example...
+        if (type === 'Fascist' && game.fascistPoliciesEnacted < 2) {
+          // consult board to see when first presidential power is unlocked
           // Begin a new round with a new Election
-          let nextCandidate = players.find(player => player.isPresidentialCandidate);
-          console.log({nextCandidate});
+          let nextCandidate = players.find((player) => player.isPresidentialCandidate);
+          console.log({ nextCandidate });
           io.emit('callNewElection', nextCandidate);
         }
       }
@@ -326,14 +328,11 @@ io.on('connection', (socket) => {
         io.emit('gameOver', msg);
       }
     }
-
   });
 
-
-
-
-
+  //
   // Executive powers
+  //
   socket.on('policyPeek', (player) => {
     let policyTiles = game.drawPolicyTiles(true);
     socket.emit('returnPolicyPeek', player, policyTiles);
@@ -351,38 +350,31 @@ io.on('connection', (socket) => {
 
     fn(partyMembership);
   });
-
 });
 
-
-
-
-
+//
 // HELPERS
+//
+function shuffle(array) {
+  let currentIndex = array.length;
+  let temporaryValue, randomIndex;
 
-function shuffle (array) {
-	let currentIndex = array.length;
-	let temporaryValue, randomIndex;
+  while (0 !== currentIndex) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
 
-	while (0 !== currentIndex) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex -= 1;
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
 
-		temporaryValue = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temporaryValue;
-	}
+  return array;
+}
 
-	return array;
-};
-
-function returnOddOrEven () {
+function returnOddOrEven() {
   return Math.round(Math.random());
 }
 
 function formatUsername(string) {
-  return string.toLowerCase()
-               .trim()
-               .split(' ')
-               .join('-');
+  return string.toLowerCase().trim().split(' ').join('-');
 }

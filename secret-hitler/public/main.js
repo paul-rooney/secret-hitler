@@ -1,7 +1,6 @@
+(function(){
+
 const socket = io();
-
-
-
 
 // CACHE THE DOM
 
@@ -26,15 +25,9 @@ const closeHowToPlayButton = document.querySelector('#closeHowToPlayButton');
 const howToPlay = document.querySelector('#button_howToPlay');
 const rules = document.querySelector('.rules');
 
-
-
-
 // VARIABLES
 
 let player = {};
-
-
-
 
 // FUNCTIONS
 
@@ -53,7 +46,7 @@ function submitForm(e) {
         document.body.id = formatUsername(name);
         formInput.value = '';
 
-        document.title = name + ' • Secret Hitler';
+        document.title = `${name} • Secret Hitler`;
       }
     });
   }
@@ -94,11 +87,11 @@ function printPlayersList(players) {
 function printElectionResult(election) {
   let output = [];
 
-  election.playerVotes.forEach(playerVote => {
+  election.playerVotes.forEach((playerVote) => {
     let markup = `<div style="border: 1px solid; margin-bottom: 8px;">
-    <p>${playerVote.player} voted:<br>
-    ${playerVote.vote}</p>
-    </div>`;
+                    <p>${playerVote.player} voted:<br>
+                    ${playerVote.vote}</p>
+                  </div>`;
 
     output.push(markup);
   });
@@ -109,7 +102,6 @@ function printElectionResult(election) {
 function assignPlayerRoles(players) {
   for (var i = 0; i < players.length; i++) {
     if (players[i].id === document.body.id) {
-
       if (players[i].partyMembership === 'Liberal') {
         player = new Liberal(players[i].name);
       } else if (players[i].secretRole === 'Hitler') {
@@ -136,7 +128,7 @@ function printPolicyTiles(policyTiles, visibleToChancellor) {
   let output = [];
 
   if (visibleToChancellor) {
-    policyTiles.forEach(policyTile => {
+    policyTiles.forEach((policyTile) => {
       let markup = `<div data-party="${policyTile}" style="border: 1px solid; margin-bottom: 8px;">
                       <p>${player.isChancellor ? policyTile : 'Policy Tile'}</p>
                       ${player.isChancellor ? '<button data-discard type="button">Discard</button>' : ''}
@@ -145,11 +137,11 @@ function printPolicyTiles(policyTiles, visibleToChancellor) {
       output.push(markup);
     });
   } else {
-    policyTiles.forEach(policyTile => {
+    policyTiles.forEach((policyTile) => {
       let markup = `<div data-party="${policyTile}" style="border: 1px solid; margin-bottom: 8px;">
-      <p>${player.isPresident ? policyTile : 'Policy Tile'}</p>
-      ${player.isPresident ? '<button data-discard type="button">Discard</button>' : ''}
-      </div>`;
+                      <p>${player.isPresident ? policyTile : 'Policy Tile'}</p>
+                      ${player.isPresident ? '<button data-discard type="button">Discard</button>' : ''}
+                    </div>`;
 
       output.push(markup);
     });
@@ -164,7 +156,7 @@ function addTileToBoard(type) {
                   <p>${type}</p>
                 </div>`;
 
-                console.log(markup); // this is adding all three players' markup to each player's board
+  console.log(markup); // this is adding all three players' markup to each player's board
 
   output.push(markup);
 
@@ -192,8 +184,6 @@ function toggleHowToPlay() {
   rules.classList.toggle('is-in-view');
 }
 
-
-
 // EVENT HANDLERS
 
 form.addEventListener('submit', submitForm);
@@ -203,18 +193,12 @@ viewD.addEventListener('click', discardPolicyTiles);
 // openHowToPlayButton.addEventListener('click', showHowToPlay);
 
 document.body.addEventListener('click', (e) => {
-
   if (e.target === drawPolicyTileButton) drawPolicyTiles();
   if (e.target === nominateChancellorButton) nominateChancellor();
   // if (e.target === viewD) discardPolicyTiles();
   // if (e.target === openHowToPlayButton || e.target === closeHowToPlayButton) toggleHowToPlay();
   if (e.target === button_howToPlay) toggleHowToPlay();
-
 });
-
-
-
-
 
 // SOCKET EVENTS
 
@@ -222,10 +206,6 @@ socket.on('startGame', (players) => {
   assignPlayerRoles(players);
   printPlayersList(players);
 });
-
-
-
-
 
 // Election events
 socket.on('callElection', (nominator, nominee) => {
@@ -239,10 +219,12 @@ socket.on('returnElectionResult', (election) => {
 
   // ELECTION FAILED
   if (!election.votePassed) {
-    console.log(`The election failed. \nThe presidential candidacy passes to the next player, ${election.presidentialCandidate}.`);
+    console.log(
+      `The election failed. \nThe presidential candidacy passes to the next player, ${election.presidentialCandidate}.`
+    );
 
     let containers = document.querySelectorAll('[data-role-container]');
-    containers.forEach(container => container.textContent = '');
+    containers.forEach((container) => (container.textContent = ''));
 
     let containerToUpdate = document.querySelector(`input[value="${election.presidentialCandidate}"]`).parentNode;
     containerToUpdate.querySelector('[data-role-container]').textContent = 'Presidental Candidate';
@@ -257,7 +239,7 @@ socket.on('returnElectionResult', (election) => {
   // ELECTION SUCCEEDED
   if (election.votePassed) {
     let containers = document.querySelectorAll('[data-role-container]');
-    containers.forEach(container => container.textContent = '');
+    containers.forEach((container) => (container.textContent = ''));
 
     let containerToUpdate = document.querySelector(`input[value="${election.president}"]`).parentNode;
     document.querySelector(`input[value="${election.president}"]`).setAttribute('disabled', 'true');
@@ -284,16 +266,12 @@ socket.on('returnElectionResult', (election) => {
 });
 
 socket.on('gameOver', (msg) => {
-  alert(msg)
+  alert(msg);
 });
 
 socket.on('callNewElection', (nextCandidate) => {
   console.log(nextCandidate);
 });
-
-
-
-
 
 // Legislative session events
 socket.on('returnPolicyTiles', (player, policyTiles) => {
@@ -301,15 +279,13 @@ socket.on('returnPolicyTiles', (player, policyTiles) => {
   printPolicyTiles(policyTiles, false);
 });
 
-
-
 socket.on('returnDiscardedPolicyTile', (policyTile) => {
   let node = document.querySelector(`[data-party="${policyTile}"]`);
 
   viewD.removeChild(node);
 
   let remainingTilesArray = Array.from(document.querySelectorAll('[data-party]'));
-  let remainingTiles = remainingTilesArray.map(tile => tile.dataset.party);
+  let remainingTiles = remainingTilesArray.map((tile) => tile.dataset.party);
 
   if (remainingTiles.length === 1) {
     let type = remainingTiles[0];
@@ -320,15 +296,9 @@ socket.on('returnDiscardedPolicyTile', (policyTile) => {
   printPolicyTiles(remainingTiles, true);
 });
 
-
-
 socket.on('returnFinalPolicyTile', (type) => {
   addTileToBoard(type);
 });
-
-
-
-
 
 // Executive Power events
 socket.on('returnPolicyPeek', (player, policyTiles) => {
@@ -346,20 +316,13 @@ socket.on('investigateLoyalty', (caller, target) => {
 socket.on('revealLoyalty', (caller, loyalty) => {
   if (caller.id !== document.body.id) return;
 
-  console.log({caller, loyalty});
+  console.log({ caller, loyalty });
 });
-
-
-
-
 
 // HELPERS
 
 function formatUsername(string) {
-  return string.toLowerCase()
-               .trim()
-               .split(' ')
-               .join('-');
+  return string.toLowerCase().trim().split(' ').join('-');
 }
 
 function formatArray(array) {
@@ -370,30 +333,4 @@ function formatArray(array) {
   }
 }
 
-// function confirmChoice(str, confirm, cancel) {
-//   const confirmButton = confirmModal.querySelector('[data-confirm]');
-//   const cancelButton = confirmModal.querySelector('[data-cancel]');
-//
-//   confirmModal.querySelector('p').textContent = str;
-//
-//   confirmButton.addEventListener('click', () => {
-//     confirm();
-//     confirmModal.querySelector('p').textContent = '';
-//   });
-//
-//   cancelButton.addEventListener('click', () => {
-//     cancel();
-//     confirmModal.querySelector('p').textContent = '';
-//   });
-// }
-  //
-  // // test of the above
-  // confirmChoice(
-  //   'Do a thing.',
-  //   function() {
-  //       console.log('You confirmed a thing.');
-  //   },
-  //   function() {
-  //       console.log('You cancelled a thing.');
-  //   }
-  // );
+})();
