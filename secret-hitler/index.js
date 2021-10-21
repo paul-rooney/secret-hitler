@@ -28,8 +28,8 @@ class Game {
   addPlayerToGame() {
     this.totalPlayers++;
 
-    if (this.totalPlayers >= 3) {
-      // if (this.totalPlayers >= 5) {
+    // if (this.totalPlayers >= 5) {
+    if (this.totalPlayers >= 3) { // use some kind of button to begin and run the below fn
       this.assignPlayerRoles();
     }
   }
@@ -41,14 +41,23 @@ class Game {
   assignPlayerRoles() {
     let partyMembershipDistribution;
 
+////// for debugging/testing purposes only /////////////////////////////////////
     if (this.totalPlayers < 3 || this.totalPlayers > 10) return;
-    // if (this.totalPlayers < 5 || this.totalPlayers > 10) return;
 
+    // log some kind of warning then kill the function
+    // if (this.totalPlayers < 5 || this.totalPlayers > 10) {
+    //   console.error('There must be between 5 and 10 players to start the game.');
+    //   return;
+    // }
+
+////// for debugging/testing purposes only /////////////////////////////////////
     // 3 Liberals, 1 Fascist + 1 Hitler
     if (this.totalPlayers === 3) {
       partyMembershipDistribution = ['Liberal', 'Fascist', 'Hitler'];
     }
-    // if (this.totalPlayers === 5) { partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler']; }
+    // if (this.totalPlayers === 5) {
+    //   partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+    // }
 
     // 4 Liberals, 1 Fascist + 1 Hitler
     if (this.totalPlayers === 6) {
@@ -62,7 +71,7 @@ class Game {
 
     // 5 Liberals, 2 Fascists + 1 Hitler
     if (this.totalPlayers === 8) {
-      partyMembershipDistribution = [ 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
     }
 
     // 5 Liberals, 3 Fascists + 1 Hitler
@@ -129,7 +138,7 @@ class Election {
     this.chancellorCandidate = '';
     this.president = '';
     this.chancellor = '';
-    this.isIneligibleForChancellorship;
+    this.isIneligibleForChancellorship = false;
   }
 }
 
@@ -151,16 +160,21 @@ const election = new Election();
 // SOCKET.IO LOGIC
 //
 io.on('connection', (socket) => {
-
+  let addedUser = false;
   //
   // Joining the game
   //
-  socket.on('submitName', (name, fn) => {
+  socket.on('submitName', (name, callback) => {
+    if (addedUser) return;
+
+    // if the name is already in the global players array, return an error message to the client
     if (players.indexOf(name) !== -1) {
-      fn(false);
+      callback(false);
     } else {
-      fn(true);
+
+      callback(true);
       names.push(name);
+      addedUser = true;
       let newPlayer = {
         name: name,
         id: formatUsername(name),
@@ -170,6 +184,10 @@ io.on('connection', (socket) => {
       game.addPlayerToGame();
     }
   });
+
+
+
+
 
   //
   // Election

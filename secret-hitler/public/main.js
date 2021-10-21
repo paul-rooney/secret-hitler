@@ -1,4 +1,4 @@
-(function(){
+
 
 const socket = io();
 
@@ -332,5 +332,3 @@ function formatArray(array) {
     return array;
   }
 }
-
-})();
