@@ -11,9 +11,11 @@ server.listen(port, () => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-//
-// CLASSES
-//
+const names = [];
+const players = [];
+
+let ticker = 0;
+
 class Game {
   constructor() {
     this.liberalPolicyTiles = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal'];
@@ -39,54 +41,41 @@ class Game {
   }
 
   assignPlayerRoles() {
-    let partyMembershipDistribution;
-
-////// for debugging/testing purposes only /////////////////////////////////////
-    if (this.totalPlayers < 3 || this.totalPlayers > 10) return;
-
-    // log some kind of warning then kill the function
-    // if (this.totalPlayers < 5 || this.totalPlayers > 10) {
-    //   console.error('There must be between 5 and 10 players to start the game.');
-    //   return;
-    // }
-
-////// for debugging/testing purposes only /////////////////////////////////////
-    // 3 Liberals, 1 Fascist + 1 Hitler
-    if (this.totalPlayers === 3) {
-      partyMembershipDistribution = ['Liberal', 'Fascist', 'Hitler'];
-    }
-    // if (this.totalPlayers === 5) {
-    //   partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
-    // }
-
-    // 4 Liberals, 1 Fascist + 1 Hitler
-    if (this.totalPlayers === 6) {
-      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+    if (this.totalPlayers < 5 || this.totalPlayers > 10) {
+      console.warn('There must be between 5 and 10 players to start the game.');
+      return;
     }
 
-    // 4 Liberals, 2 Fascists + 1 Hitler
-    if (this.totalPlayers === 7) {
-      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+    let partyMembershipDistribution,
+        randomisedDistribution;
+
+    switch (this.totalPlayers) {
+      case 3:
+        partyMembershipDistribution = ['Liberal', 'Fascist', 'Hitler'];
+        break;
+      case 5:
+        partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+        break;
+      case 6:
+        partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+        break;
+      case 7:
+        partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+        break;
+      case 8:
+        partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+        break;
+      case 9:
+        partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
+        break;
+      case 10:
+        partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
+        break;
     }
 
-    // 5 Liberals, 2 Fascists + 1 Hitler
-    if (this.totalPlayers === 8) {
-      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
-    }
+    randomisedDistribution = shuffle(partyMembershipDistribution.slice());
 
-    // 5 Liberals, 3 Fascists + 1 Hitler
-    if (this.totalPlayers === 9) {
-      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
-    }
-
-    // 6 Liberals, 3 Fascists + 1 Hitler
-    if (this.totalPlayers === 10) {
-      partyMembershipDistribution = ['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
-    }
-
-    let randomisedDistribution = shuffle(partyMembershipDistribution.slice());
-
-    players.forEach((player) => {
+    players.forEach(player => {
       let partyMembership = randomisedDistribution.pop();
 
       if (partyMembership === 'Liberal') player.partyMembership = 'Liberal';
@@ -106,7 +95,7 @@ class Game {
     }
 
     if (peek) {
-      let peekedTiles = this.policyTilesDrawPile.splice(-3, 3);
+      let peekedTiles = this.policyTilesDrawPile.slice(-3, 3);
       return peekedTiles; // not working
     }
 
@@ -123,7 +112,6 @@ class Game {
     io.emit('startGame', players);
   }
 }
-
 class Election {
   constructor() {
     this.ticker = 0;
@@ -142,13 +130,6 @@ class Election {
   }
 }
 
-//
-// DOM CACHING
-//
-const names = [];
-const players = [];
-
-let ticker = 0;
 
 //
 // INITIALISATION
@@ -160,10 +141,9 @@ const election = new Election();
 // SOCKET.IO LOGIC
 //
 io.on('connection', (socket) => {
-  let addedUser = false;
-  //
-  // Joining the game
-  //
+  let addedUser = false,
+      newPlayer;
+
   socket.on('submitName', (name, callback) => {
     if (addedUser) return;
 
@@ -175,7 +155,7 @@ io.on('connection', (socket) => {
       callback(true);
       names.push(name);
       addedUser = true;
-      let newPlayer = {
+      newPlayer = {
         name: name,
         id: formatUsername(name),
         UID: socket.id,

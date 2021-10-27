@@ -9,9 +9,9 @@ class Player {
     this.isIneligibleForChancellorship = false;
   }
 
-
-
+  //
   // Election methods
+  //
   nominateChancellor() {
     if (!this.isPresidentialCandidate) return;
 
@@ -38,7 +38,9 @@ class Player {
     }
   }
 
+  //
   // Legislative session methods
+  //
   drawPolicyTiles() {
     // if (!this.isPresident) return;
     if (!this.isPresident) {
@@ -59,7 +61,9 @@ class Player {
     socket.emit('revealPolicyTile', type);
   }
 
+  //
   // Executive powers methods
+  //
   investigateLoyalty() {
     if (!this.isPresident) return;
 
@@ -93,7 +97,9 @@ class Player {
       return;
     }
 
-    socket.emit('policyPeek', player);
+    socket.emit('policyPeek', player, fn(data => {
+      console.log(data);
+    }));
   }
 }
 
