@@ -193,25 +193,26 @@ io.on('connection', (socket) => {
   // Election
   //
   socket.on('nominateChancellor', (nominator, nominee, fn) => {
-    if (election.isIneligibleForChancellorship !== undefined) {
-      if (game.totalPlayers > 5) {
-        let ineligibleCandidates = election.isIneligibleForChancellorship;
-        for (let i = 0; i < ineligibleCandidates.length; i++) {
-          if (nominee === ineligibleCandidates[i]) {
-            fn('This person is “term-limited”, and ineligible to be nominated as Chancellor Candidate for this round.');
-            return;
-          }
-        }
-      } else {
-        if (nominee === election.isIneligibleForChancellorship[0]) {
-          // this references the last-elected Chancellor
+    if (election.isIneligibleForChancellorship === undefined) return;
+
+    if (game.totalPlayers > 5) { // should always be the case
+      let ineligibleCandidates = election.isIneligibleForChancellorship;
+      for (let i = 0; i < ineligibleCandidates.length; i++) {
+        if (nominee === ineligibleCandidates[i]) {
           fn('This person is “term-limited”, and ineligible to be nominated as Chancellor Candidate for this round.');
           return;
         }
       }
+    } else {
+      if (nominee === election.isIneligibleForChancellorship[0]) {
+        // this references the last-elected Chancellor
+        fn('This person is “term-limited”, and ineligible to be nominated as Chancellor Candidate for this round.');
+        return;
+      }
     }
 
     io.emit('callElection', nominator, nominee);
+
     election.presidentialCandidate = nominator;
     election.chancellorCandidate = nominee;
   });
